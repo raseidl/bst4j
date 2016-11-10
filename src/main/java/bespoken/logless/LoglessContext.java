@@ -1,25 +1,18 @@
 package bespoken.logless;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import bespoken.util.ReflectionUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -36,12 +29,12 @@ public class LoglessContext {
     private String transactionID = null;
     private String source;
 
-
     public LoglessContext (String source) {
         this.source = source;
         this.transactionID = UUID.randomUUID().toString();
         this.resetQueue();
-        System.setOut(new PrintStreamWrapper(this, System.out));
+        System.setOut(new PrintStreamWrapper(this, System.out, LogType.DEBUG));
+        System.setErr(new PrintStreamWrapper(this, System.err, LogType.ERROR));
     }
 
     public void log(LogType logType, Object data, String [] parameters, String [] tags) {
@@ -81,7 +74,7 @@ public class LoglessContext {
         this.queue = new ArrayList<Log>();
     }
 
-    private void transmit(String jsonString) {
+    protected void transmit(String jsonString) {
         try {
             transmitImpl(jsonString);
         } catch (Exception e) {
@@ -137,20 +130,6 @@ public class LoglessContext {
         public String transactionID;
     }
 
-    public static class PrintStreamWrapper extends PrintStream {
-        public PrintStream wrappedStream;
-        public LoglessContext context;
-
-        public PrintStreamWrapper(LoglessContext context, PrintStream stream) {
-            super((OutputStream) ReflectionUtil.get(stream, "out"));
-            this.wrappedStream = stream;
-            this.context = context;
-        }
-
-        public void println(String s) {
-            context.log(LogType.DEBUG, s, null, null);
-        }
-    }
 }
 
 

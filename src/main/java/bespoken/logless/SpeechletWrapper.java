@@ -7,10 +7,10 @@ import com.amazon.speech.speechlet.*;
  */
 public class SpeechletWrapper implements Speechlet {
     private Speechlet wrappedSpeechlet = null;
-    private String source = null;
+    private Logless logless = null;
 
-    public SpeechletWrapper(String source, Speechlet wrappedSpeechlet) {
-        this.source = source;
+    public SpeechletWrapper(Logless logless, Speechlet wrappedSpeechlet) {
+        this.logless = logless;
         this.wrappedSpeechlet = wrappedSpeechlet;
     }
 
@@ -36,7 +36,7 @@ public class SpeechletWrapper implements Speechlet {
 
     @Override
     public void onSessionStarted(SessionStartedRequest sessionStartedRequest, Session session) throws SpeechletException {
-        this.captureRequest(new LoglessContext(source), sessionStartedRequest, session);
+        this.captureRequest(logless.newContext(), sessionStartedRequest, session);
         this.wrappedSpeechlet.onSessionStarted(sessionStartedRequest, session);
     }
 
@@ -47,7 +47,7 @@ public class SpeechletWrapper implements Speechlet {
 
     @Override
     public SpeechletResponse onIntent(IntentRequest intentRequest, Session session) throws SpeechletException {
-        LoglessContext context = new LoglessContext(source);
+        LoglessContext context = logless.newContext();
         this.captureRequest(context, intentRequest, session);
         return this.captureResponse(context, this.wrappedSpeechlet.onIntent(intentRequest, session));
     }
