@@ -39,6 +39,7 @@ public class SpeechletWrapperTest {
             PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
             outputSpeech.setText("Test");
             response.setOutputSpeech(outputSpeech);
+            System.out.println("SystemOutTest");
             return response;
         }
 

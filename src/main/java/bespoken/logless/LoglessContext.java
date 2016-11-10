@@ -2,6 +2,8 @@ package bespoken.logless;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -11,6 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import bespoken.util.ReflectionUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,6 +41,7 @@ public class LoglessContext {
         this.source = source;
         this.transactionID = UUID.randomUUID().toString();
         this.resetQueue();
+        System.setOut(new PrintStreamWrapper(this, System.out));
     }
 
     public void log(LogType logType, Object data, String [] parameters, String [] tags) {
@@ -121,7 +125,7 @@ public class LoglessContext {
             this.stack = stack;
             this.tags = tags;
             this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
-            System.out.println("Timestamp: " + this.timestamp);
+            //System.out.println("Timestamp: " + this.timestamp);
         }
     }
 
@@ -131,6 +135,21 @@ public class LoglessContext {
 
         @JsonProperty("transaction_id")
         public String transactionID;
+    }
+
+    public static class PrintStreamWrapper extends PrintStream {
+        public PrintStream wrappedStream;
+        public LoglessContext context;
+
+        public PrintStreamWrapper(LoglessContext context, PrintStream stream) {
+            super((OutputStream) ReflectionUtil.get(stream, "out"));
+            this.wrappedStream = stream;
+            this.context = context;
+        }
+
+        public void println(String s) {
+            context.log(LogType.DEBUG, s, null, null);
+        }
     }
 }
 
