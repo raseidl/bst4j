@@ -1,5 +1,6 @@
 package bespoken.logless;
 
+import java.io.BufferedOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -12,21 +13,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jpk on 11/8/16.
  */
 public class LoglessContext {
-    private static ThreadPoolExecutor executor;
-    static {
-        executor = new ThreadPoolExecutor(1, 10, 1000, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000));
-    }
-
-    private List<Log> queue = null;
-    private String transactionID = null;
+    private List<Log> queue;
+    private String transactionID;
     private String source;
 
     public LoglessContext (String source) {
@@ -38,7 +31,7 @@ public class LoglessContext {
     }
 
     public void log(LogType logType, Object data, String [] parameters, String [] tags) {
-        Log log = null;
+        Log log;
         if (data instanceof String) {
             String dataString = (String) data;
             if (parameters != null) {
@@ -49,6 +42,15 @@ public class LoglessContext {
             log = new Log(logType, data, null, tags);
         }
 
+        queue.add(log);
+    }
+
+    public void logException(LogType logType, Exception e, String [] tags) {
+        StringBuilder stack = new StringBuilder();
+        for (StackTraceElement element : e.getStackTrace()) {
+            stack.append(element.toString() + "\n");
+        }
+        Log log = new Log(logType, e.getClass().getSimpleName() + ": " + e.getMessage(), stack.toString(), tags);
         queue.add(log);
     }
 
@@ -71,7 +73,7 @@ public class LoglessContext {
     }
 
     private void resetQueue () {
-        this.queue = new ArrayList<Log>();
+        this.queue = new ArrayList<>();
     }
 
     protected void transmit(String jsonString) {
@@ -82,6 +84,7 @@ public class LoglessContext {
         }
     }
     private void transmitImpl(String jsonString) throws Exception {
+        long startTime = System.currentTimeMillis();
         String loglessURL = "https://" + Logless.Domain + "/v1/receive";
         URL url = new URI(loglessURL).toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -89,9 +92,12 @@ public class LoglessContext {
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setDoInput(true);
-        connection.getOutputStream().write(jsonString.getBytes());
-        connection.getOutputStream().flush();
+        BufferedOutputStream bos = new BufferedOutputStream(connection.getOutputStream());
+        bos.write(jsonString.getBytes());
+        bos.flush();
         connection.getInputStream();
+
+        System.out.append("Time: " + (System.currentTimeMillis() - startTime) + "\n");
     }
 
     public enum LogType {
@@ -108,17 +114,19 @@ public class LoglessContext {
 
         @JsonProperty("payload")
         public Object payload;
-        public String [] stack;
+        public String stack;
         public String [] tags;
         public String timestamp;
 
-        public Log(LogType logType, Object payload, String[] stack, String[] tags) {
+        public Log(LogType logType, Object payload, String stack, String[] tags) {
             this.logType = logType;
             this.payload = payload;
             this.stack = stack;
             this.tags = tags;
+            if (this.tags == null) {
+                this.tags = new String[0];
+            }
             this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
-            //System.out.println("Timestamp: " + this.timestamp);
         }
     }
 

@@ -36,13 +36,21 @@ public class SpeechletWrapper implements Speechlet {
 
     @Override
     public void onSessionStarted(SessionStartedRequest sessionStartedRequest, Session session) throws SpeechletException {
-        this.captureRequest(logless.newContext(), sessionStartedRequest, session);
-        this.wrappedSpeechlet.onSessionStarted(sessionStartedRequest, session);
+        LoglessContext context = logless.newContext();
+        this.captureRequest(context, sessionStartedRequest, session);
+        try {
+            this.wrappedSpeechlet.onSessionStarted(sessionStartedRequest, session);
+        } catch (Exception e) {
+            context.logException(LoglessContext.LogType.ERROR, e, null);
+        }
+        context.flush();
     }
 
     @Override
     public SpeechletResponse onLaunch(LaunchRequest launchRequest, Session session) throws SpeechletException {
-        return this.wrappedSpeechlet.onLaunch(launchRequest, session);
+        LoglessContext context = logless.newContext();
+        this.captureRequest(context, launchRequest, session);
+        return this.captureResponse(context, this.wrappedSpeechlet.onLaunch(launchRequest, session));
     }
 
     @Override
@@ -54,6 +62,8 @@ public class SpeechletWrapper implements Speechlet {
 
     @Override
     public void onSessionEnded(SessionEndedRequest sessionEndedRequest, Session session) throws SpeechletException {
+        LoglessContext context = logless.newContext();
+        this.captureRequest(context, sessionEndedRequest, session);
         this.wrappedSpeechlet.onSessionEnded(sessionEndedRequest, session);
     }
 }

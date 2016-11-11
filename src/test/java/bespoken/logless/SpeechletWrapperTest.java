@@ -1,5 +1,6 @@
 package bespoken.logless;
 
+import bespoken.util.JSONUtil;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.OutputSpeech;
@@ -20,7 +21,7 @@ public class SpeechletWrapperTest {
 
     @Test
     public void testIntentRequest () throws Exception {
-        Logless logless = new Logless("6757fc65-3ecb-409d-8685-3fdf4043bdd6") {
+        Logless logless = new Logless("6739f6ae-c54c-4869-85ea-416b8f00ed2e") {
             @Override
             public LoglessContext newContext() {
                 return new LoglessContext(this.source) {
@@ -28,12 +29,7 @@ public class SpeechletWrapperTest {
                     protected void transmit(String jsonString) {
                         super.transmit(jsonString);
                         ObjectMapper mapper = new ObjectMapper();
-                        JsonNode node = null;
-                        try {
-                            node = mapper.readTree(jsonString);
-                        } catch (Exception e) {
-
-                        }
+                        JsonNode node = JSONUtil.toJSON(jsonString);
                         Assert.assertEquals(node.get("logs").size(), 4);
                         Assert.assertEquals(node.get("logs").get(0).get("log_type").textValue(), "INFO");
                         Assert.assertEquals(node.get("logs").get(0).get("tags").get(0).textValue(), "request");
