@@ -1,3 +1,12 @@
 .idea/
 *.iml
-target/
+target/apidocs
+target/checkout
+target/classes
+target/generated-sources
+target/generated-test-source
+target/javadoc-bundle-options
+target/maven-archiver
+target/maven-status
+target/surefire-reports
+target/test-classes
