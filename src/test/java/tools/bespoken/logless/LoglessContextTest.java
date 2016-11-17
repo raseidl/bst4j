@@ -1,6 +1,6 @@
-package bespoken.logless;
+package tools.bespoken.logless;
 
-import bespoken.util.JSONUtil;
+import tools.bespoken.util.JSONUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class LoglessContextTest {
                 Assert.assertEquals("ERROR", json.get("logs").get(0).get("log_type").asText());
                 String stack = json.get("logs").get(0).get("stack").asText();
                 String [] stackParts = stack.split("\n");
-                Assert.assertTrue(stackParts[0].startsWith("bespoken.logless.LoglessContextTest.testExceptionLog(LoglessContextTest.java"));
+                Assert.assertTrue(stackParts[0].startsWith("tools.bespoken.logless.LoglessContextTest.testExceptionLog(LoglessContextTest.java"));
                 Assert.assertEquals("ExceptionTag", json.get("logs").get(0).get("tags").get(0).asText());
                 Assert.assertEquals("Exception: This is an Exception", json.get("logs").get(0).get("payload").asText());
             }
@@ -69,11 +69,12 @@ public class LoglessContextTest {
                 verifier.verify(json);
             }
         };
+
         return context;
     }
 
     public interface IVerifier {
-        public void verify(JsonNode json);
+        void verify(JsonNode json);
     }
 
     public static class RichObject {

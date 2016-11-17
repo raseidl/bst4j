@@ -1,6 +1,4 @@
-package bespoken.logless;
-
-import bespoken.util.ReflectionUtil;
+package tools.bespoken.logless;
 
 import java.io.IOException;
 import java.io.OutputStream;

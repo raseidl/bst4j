@@ -1,4 +1,4 @@
-package bespoken.logless;
+package tools.bespoken.logless;
 
 import java.io.BufferedOutputStream;
 import java.net.HttpURLConnection;
@@ -45,7 +45,7 @@ public class LoglessContext {
         queue.add(log);
     }
 
-    public void logException(LogType logType, Exception e, String [] tags) {
+    public void logException(LogType logType, Throwable e, String [] tags) {
         StringBuilder stack = new StringBuilder();
         for (StackTraceElement element : e.getStackTrace()) {
             stack.append(element.toString() + "\n");

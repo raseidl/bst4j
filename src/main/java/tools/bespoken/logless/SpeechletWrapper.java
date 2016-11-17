@@ -1,4 +1,4 @@
-package bespoken.logless;
+package tools.bespoken.logless;
 
 import com.amazon.speech.speechlet.*;
 
@@ -40,30 +40,63 @@ public class SpeechletWrapper implements Speechlet {
         this.captureRequest(context, sessionStartedRequest, session);
         try {
             this.wrappedSpeechlet.onSessionStarted(sessionStartedRequest, session);
-        } catch (Exception e) {
-            context.logException(LoglessContext.LogType.ERROR, e, null);
+            context.flush();
+        } catch (SpeechletException e) {
+            throw handleException(context, e);
+        } catch (RuntimeException e) {
+            throw handleException(context, e);
         }
-        context.flush();
     }
 
     @Override
     public SpeechletResponse onLaunch(LaunchRequest launchRequest, Session session) throws SpeechletException {
         LoglessContext context = logless.newContext();
         this.captureRequest(context, launchRequest, session);
-        return this.captureResponse(context, this.wrappedSpeechlet.onLaunch(launchRequest, session));
+        SpeechletResponse response;
+        try {
+            response = this.wrappedSpeechlet.onLaunch(launchRequest, session);
+        } catch (SpeechletException e) {
+            throw handleException(context, e);
+        } catch (RuntimeException e) {
+            throw handleException(context, e);
+        }
+
+        return this.captureResponse(context, response);
     }
 
     @Override
     public SpeechletResponse onIntent(IntentRequest intentRequest, Session session) throws SpeechletException {
         LoglessContext context = logless.newContext();
         this.captureRequest(context, intentRequest, session);
-        return this.captureResponse(context, this.wrappedSpeechlet.onIntent(intentRequest, session));
+        SpeechletResponse response;
+        try {
+            response = this.wrappedSpeechlet.onIntent(intentRequest, session);
+        } catch (SpeechletException e) {
+            throw handleException(context, e);
+        } catch (RuntimeException e) {
+            throw handleException(context, e);
+        }
+
+        return this.captureResponse(context, response);
     }
 
     @Override
     public void onSessionEnded(SessionEndedRequest sessionEndedRequest, Session session) throws SpeechletException {
         LoglessContext context = logless.newContext();
         this.captureRequest(context, sessionEndedRequest, session);
-        this.wrappedSpeechlet.onSessionEnded(sessionEndedRequest, session);
+        try {
+            this.wrappedSpeechlet.onSessionEnded(sessionEndedRequest, session);
+            context.flush();
+        } catch (SpeechletException e) {
+            throw handleException(context, e);
+        } catch (RuntimeException e) {
+            throw handleException(context, e);
+        }
+    }
+
+    private <T extends Exception> T handleException(LoglessContext context, T e) {
+        context.logException(LoglessContext.LogType.ERROR, e, null);
+        context.flush();
+        return e;
     }
 }

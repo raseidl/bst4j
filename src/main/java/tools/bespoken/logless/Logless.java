@@ -1,4 +1,4 @@
-package bespoken.logless;
+package tools.bespoken.logless;
 
 import com.amazon.speech.speechlet.*;
 
