@@ -1,5 +1,7 @@
 package tools.bespoken.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import tools.bespoken.util.HTTPUtil;
 import tools.bespoken.util.JSONUtil;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,7 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  */
 public class BSTMonetize {
-    public static String MonetizerRequestService = "https://monetize.bespoken.tools";
+    public static String MonetizerDomain = "monetize.bespoken.tools";
+    public static String MonetizerRequestService = "https://" + MonetizerDomain + "/adRequest";
+    public static String MonetizerResponseService = "https://" + MonetizerDomain + "/adResponse";
     public String skillId;
 
     public BSTMonetize(String skillId) {
@@ -27,7 +31,7 @@ public class BSTMonetize {
             return new Result(ssmlNoAd, "No {ad} token found in the SSML. No place to inject ad audio.");
         }
 
-        String url = MonetizerRequestService + "?skill=" + this.skillId;
+        String url = MonetizerRequestService + "?skillID=" + this.skillId + "&adType=DIALOG";
 
         try {
             String payloadString = HTTPUtil.get(url).asString();
@@ -45,12 +49,42 @@ public class BSTMonetize {
         }
     }
 
+    public void response(BSTMonetize.Result result) {
+        if (!result.injected()) {
+            return;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        node.put("adRequestID", result.ad().id);
+        node.put("played", result.injected());
+
+        String url = MonetizerResponseService;
+
+        postJSON(url, mapper, node);
+    }
+
+    /**
+     * This is in it's own method for testability
+     * @param url
+     * @param mapper
+     * @param node
+     */
+    protected void postJSON(String url, ObjectMapper mapper, JsonNode node) {
+        try {
+            String jsonString = mapper.writeValueAsString(node);
+            HTTPUtil.post(url, jsonString.getBytes());
+        } catch (Exception e) {
+            System.err.println("BSTMonetize Response Error: " + e.getMessage());
+        }
+    }
+
     private Result noAdResult(String ssml, String error) {
         ssml = ssml.replaceFirst("\\{ad\\}", "");
         return new Result(ssml, error);
     }
 
-    private static class Ad {
+    public static class Ad {
         public String id;
         public String audioURL;
 
@@ -77,6 +111,10 @@ public class BSTMonetize {
         public Result(String ssml, String error) {
             this(ssml);
             this.error = error;
+        }
+
+        public Ad ad() {
+            return ad;
         }
 
         public boolean injected() {
