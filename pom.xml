@@ -4,7 +4,7 @@
 
     <groupId>tools.bespoken</groupId>
     <artifactId>bst4j</artifactId>
-    <version>0.1.14-SNAPSHOT</version>
+    <version>0.1.14</version>
     <packaging>jar</packaging>
     <name>bst4j</name>
     <description>Bespoken Tools for Java</description>
@@ -27,8 +27,8 @@
         <url>https://github.com/bespoken/bst4j</url>
         <connection>scm:git:https://github.com/bespoken/bst4j.git</connection>
         <developerConnection>scm:git:https://github.com/bespoken/bst4j.git</developerConnection>
-      <tag>v0.1.9</tag>
-  </scm>
+        <tag>v0.1.9</tag>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -36,6 +36,20 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <developers>
+        <developer>
+            <id>jpk</id>
+            <name>John Kelvie</name>
+            <email>jpk@xappmedia.com</email>
+            <organization>Bespoken Tools</organization>
+            <organizationUrl>https://bespoken.tools</organizationUrl>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
 
     <build>
         <plugins>

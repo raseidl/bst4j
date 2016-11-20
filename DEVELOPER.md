@@ -1,0 +1,2 @@
+http://central.sonatype.org/pages/apache-maven.html
+mvn clean deploy -P release
