@@ -1,3 +1,4 @@
+# Releases
 To prepare all releases:
 mvn release:clean release:prepare
 
@@ -18,3 +19,15 @@ http://maven.apache.org/maven-release/maven-release-plugin/examples/prepare-rele
 
 mvn release:perform takes the last version and deploys it.
 mvn deploy takes the most recent (snapshot) version and deploys it.
+
+## Verify Releases
+For public releases, you can check here to see the release worked correctly:  
+https://oss.sonatype.org/content/repositories/releases/tools/bespoken/bst4j/
+
+It usually replicates to maven in about an hour (or so...still figuring this out). You can check here to see it:  
+https://repo1.maven.org/maven2/tools/bespoken/bst4j/
+
+The documentation will show up here:  
+https://www.javadoc.io/doc/tools.bespoken/bst4j/
+
+This should appear within 24-hours according to the website.

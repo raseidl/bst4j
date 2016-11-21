@@ -1,7 +1,7 @@
 package tools.bespoken.client;
 
+import com.amazon.speech.ui.SsmlOutputSpeech;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import tools.bespoken.util.HTTPUtil;
 import tools.bespoken.util.JSONUtil;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,15 +11,19 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * Call {@link tools.bespoken.client.BSTMonetize#injectSSML(String, String)} to inject an ad into SSML.<br><br>
  *
- * Call {@link tools.bespoken.client.BSTMonetize#track(Result)} to indicate the ad was "served" the user.<br>
- *     This means it was delivered as part of a response.
- *
+ * Example:<br>
+ * <pre>
+ *     BSTMonetize monetize = new BSTMonetize("MySkillID");
+ *     SpeechletResponse.newSpeechletResponse(monetize.injectSSML(
+ *          "&lt;speak&gt;Hi! Now a word from our sponsor {ad}! What do you want to do now?&lt;/speak&gt;",
+ *          "&lt;speak&gt;Hi!What do you want to do now?&lt;/speak&gt;")
+ *     ).asSsmlOutputSpeech(), repromptSpeech, card);
+ * </pre>
  */
 public class BSTMonetize {
     public static String MonetizerDomain = "monetize.bespoken.tools";
     public static String MonetizerRequestService = "https://" + MonetizerDomain + "/adRequest";
-    public static String MonetizerResponseService = "https://" + MonetizerDomain + "/adResponse";
-    public String skillId;
+    private String skillId;
 
     public BSTMonetize(String skillId) {
         this.skillId = skillId;
@@ -34,15 +38,15 @@ public class BSTMonetize {
      * Becomes:<br>
      *      <code>&lt;speak&gt;Great choice. Now, a word from our sponsor &lt;audio src="URL" /&gt;. What would you like to do next?&lt;/speak&gt;</code><br><br>
      *
-     * If no ad is found, the second paratmer, ssmlNoAd will be used.
+     * If no ad is found, the second parameter, ssmlNoAd will be used.
      *
      * @param ssml The SSML payload with {ad} token that will be monetized
      * @param ssmlNoAd The fallback SSML to be used if no ad is available to be served
      * @return Result object, which includes the SSML
      */
-    public Result injectSSML(String ssml, String ssmlNoAd) {
+    public Payload injectSSML(String ssml, String ssmlNoAd) {
         if (ssml.indexOf("{ad}") == -1) {
-            return new Result(ssmlNoAd, "No {ad} token found in the SSML. No place to inject ad audio.");
+            return new Payload(ssmlNoAd, "No {ad} token found in the SSML. No place to inject ad audio.");
         }
 
         String url = MonetizerRequestService + "?skillID=" + this.skillId + "&adType=DIALOG";
@@ -54,35 +58,13 @@ public class BSTMonetize {
             if (payload.has("audioURL") && !payload.get("audioURL").isNull()) {
                 Ad ad = new Ad(payload.get("adRequestID").asText(), payload.get("audioURL").asText());
                 ssml = ssml.replaceFirst("\\{ad\\}", "<audio src=\"" + ad.audioURL + "\" />");
-                return new Result(ssml, ad);
+                return new Payload(ssml);
             } else {
-                return new Result(ssmlNoAd);
+                return new Payload(ssmlNoAd);
             }
         } catch (Exception e) {
-            return new Result(ssmlNoAd, e.getMessage());
+            return new Payload(ssmlNoAd, e.getMessage());
         }
-    }
-
-    /**
-     * Tracks that an ad was played.
-     *
-     * This should be called when the response is served.
-     *
-     * @param result
-     */
-    public void track(BSTMonetize.Result result) {
-        if (!result.injected()) {
-            return;
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode node = mapper.createObjectNode();
-        node.put("adRequestID", result.ad().id);
-        node.put("played", result.injected());
-
-        String url = MonetizerResponseService;
-
-        postJSON(url, mapper, node);
     }
 
     /**
@@ -95,11 +77,6 @@ public class BSTMonetize {
         } catch (Exception e) {
             System.err.println("BSTMonetize Response Error: " + e.getMessage());
         }
-    }
-
-    private Result noAdResult(String ssml, String error) {
-        ssml = ssml.replaceFirst("\\{ad\\}", "");
-        return new Result(ssml, error);
     }
 
     public static class Ad {
@@ -115,23 +92,23 @@ public class BSTMonetize {
     /**
      * Payload for call to {@link BSTMonetize#injectSSML(String, String)}.<br><br>
      *
-     * Contains the SSML to be used as well as some additional metadata used by calls to {@link BSTMonetize#track(Result)}.
+     * Contains the SSML to be used as well as some additional metadata.
      */
-    public static class Result {
+    public static class Payload {
         private String ssml;
         private Ad ad;
         private String error;
 
-        public Result(String ssml) {
+        public Payload(String ssml) {
             this.ssml = ssml;
         }
 
-        public Result(String ssml, Ad ad) {
+        public Payload(String ssml, Ad ad) {
             this(ssml);
             this.ad = ad;
         }
 
-        public Result(String ssml, String error) {
+        public Payload(String ssml, String error) {
             this(ssml);
             this.error = error;
         }
@@ -144,8 +121,14 @@ public class BSTMonetize {
             return ad != null;
         }
 
-        public String ssml() {
+        public String asSsmlString() {
             return this.ssml;
+        }
+
+        public SsmlOutputSpeech asSsmlOutputSpeech() {
+            SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
+            outputSpeech.setSsml(this.ssml);
+            return outputSpeech;
         }
 
         public String error() {
