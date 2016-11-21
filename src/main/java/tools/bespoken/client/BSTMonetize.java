@@ -7,13 +7,12 @@ import tools.bespoken.util.JSONUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * For use in monetizing Alexa skills. Injects &gt;audio&lt; into SSML that serves ad.
+ * For use in monetizing Alexa skills. Injects &lt;audio&gt; into SSML that serves ad.<br><br>
  *
- * For example, an SSML payload such as this:
- *      &gt;speak&lt;Great choice. Now a word from our sponsor {ad}. What would you like to do next?&gt;/speak&lt;
+ * Call {@link tools.bespoken.client.BSTMonetize#injectSSML(String, String)} to inject an ad into SSML.<br><br>
  *
- * Becomes:
- *      &gt;speak&lt;Great choice. Now, a word from our sponsor &gt;audio src="URL" /&lt;. What would you like to do next?&gt;/speak&lt;
+ * Call {@link tools.bespoken.client.BSTMonetize#track(Result)} to indicate the ad was "served" the user.<br>
+ *     This means it was delivered as part of a response.
  *
  */
 public class BSTMonetize {
@@ -26,6 +25,21 @@ public class BSTMonetize {
         this.skillId = skillId;
     }
 
+    /**
+     * Injects an SSML payload with an ad. It looks for an {ad} token to replace.<br><br>
+     *
+     * For example, an SSML payload such as this:<br>
+     *      <code>&lt;speak&gt;Great choice. Now a word from our sponsor {ad}. What would you like to do next?&lt;/speak&gt;</code><br><br>
+     *
+     * Becomes:<br>
+     *      <code>&lt;speak&gt;Great choice. Now, a word from our sponsor &lt;audio src="URL" /&gt;. What would you like to do next?&lt;/speak&gt;</code><br><br>
+     *
+     * If no ad is found, the second paratmer, ssmlNoAd will be used.
+     *
+     * @param ssml The SSML payload with {ad} token that will be monetized
+     * @param ssmlNoAd The fallback SSML to be used if no ad is available to be served
+     * @return Result object, which includes the SSML
+     */
     public Result injectSSML(String ssml, String ssmlNoAd) {
         if (ssml.indexOf("{ad}") == -1) {
             return new Result(ssmlNoAd, "No {ad} token found in the SSML. No place to inject ad audio.");
@@ -49,7 +63,14 @@ public class BSTMonetize {
         }
     }
 
-    public void response(BSTMonetize.Result result) {
+    /**
+     * Tracks that an ad was played.
+     *
+     * This should be called when the response is served.
+     *
+     * @param result
+     */
+    public void track(BSTMonetize.Result result) {
         if (!result.injected()) {
             return;
         }
@@ -65,10 +86,7 @@ public class BSTMonetize {
     }
 
     /**
-     * This is in it's own method for testability
-     * @param url
-     * @param mapper
-     * @param node
+     * For testability
      */
     protected void postJSON(String url, ObjectMapper mapper, JsonNode node) {
         try {
@@ -94,6 +112,11 @@ public class BSTMonetize {
         }
     }
 
+    /**
+     * Payload for call to {@link BSTMonetize#injectSSML(String, String)}.<br><br>
+     *
+     * Contains the SSML to be used as well as some additional metadata used by calls to {@link BSTMonetize#track(Result)}.
+     */
     public static class Result {
         private String ssml;
         private Ad ad;

@@ -69,7 +69,7 @@ public class BSTMonetizeTest {
             }
         };
         BSTMonetize.Result result = new BSTMonetize.Result("Test", new BSTMonetize.Ad("TestID", "TestURL"));
-        monetize.response(result);
+        monetize.track(result);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class BSTMonetizeTest {
         BSTMonetize.MonetizerResponseService = "http://httpstat.us/400";
         BSTMonetize monetize = new BSTMonetize("MySkill");
         BSTMonetize.Result result = new BSTMonetize.Result("Test", new BSTMonetize.Ad("TestID", "TestURL"));
-        monetize.response(result);
+        monetize.track(result);
     }
 
     @Test
@@ -85,6 +85,6 @@ public class BSTMonetizeTest {
         BSTMonetize.MonetizerResponseService = "http://thisisnotaurl";
         BSTMonetize monetize = new BSTMonetize("MySkill");
         BSTMonetize.Result result = new BSTMonetize.Result("Test", new BSTMonetize.Ad("TestID", "TestURL"));
-        monetize.response(result);
+        monetize.track(result);
     }
 }
