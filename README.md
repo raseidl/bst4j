@@ -16,3 +16,9 @@
     </a>
 </p>
 
+---
+This an Early Access version.
+
+More details to come.
+
+For now, <a href="https://www.javadoc.io/doc/tools.bespoken/bst4j/">JavaDocs are here</a>.
