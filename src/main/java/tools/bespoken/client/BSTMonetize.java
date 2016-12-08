@@ -21,8 +21,10 @@ import com.fasterxml.jackson.databind.JsonNode;
  * </pre>
  */
 public class BSTMonetize {
-    public static String MonetizerDomain = "monetize.bespoken.tools";
-    public static String MonetizerRequestService = "https://" + MonetizerDomain + "/adRequest";
+    public static String MonetizerDomain = "monetization.bespoken.tools";
+    public static String MonetizerRequestService = "https://" + MonetizerDomain + "/v1/adRequest";
+    public static String MonetizerTrackerService = "https://" + MonetizerDomain + "/v1/adTracker";
+
     private String skillId;
 
     public BSTMonetize(String skillId) {
@@ -49,33 +51,26 @@ public class BSTMonetize {
             return new Payload(ssmlNoAd, "No {ad} token found in the SSML. No place to inject ad audio.");
         }
 
-        String url = MonetizerRequestService + "?skillID=" + this.skillId + "&adType=DIALOG";
+        String url = MonetizerRequestService + "?skillName=" + this.skillId + "&adType=DIALOG";
 
         try {
             String payloadString = HTTPUtil.get(url).asString();
             JsonNode payload = JSONUtil.toJSON(payloadString);
 
             if (payload.has("audioURL") && !payload.get("audioURL").isNull()) {
+                // Besides the ad itself, we all put in an ad tracker
+                String trackerURL = MonetizerTrackerService + "?adRequestID=" + payload.get("adRequestID").asText();
+
                 Ad ad = new Ad(payload.get("adRequestID").asText(), payload.get("audioURL").asText());
-                ssml = ssml.replaceFirst("\\{ad\\}", "<audio src=\"" + ad.audioURL + "\" />");
+                ssml = ssml.replaceFirst("\\{ad\\}",
+                        "<audio src=\"" + ad.audioURL + "\" />" +
+                        "<audio src=\"" + trackerURL + "\" />");
                 return new Payload(ssml);
             } else {
                 return new Payload(ssmlNoAd);
             }
         } catch (Exception e) {
             return new Payload(ssmlNoAd, e.getMessage());
-        }
-    }
-
-    /**
-     * For testability
-     */
-    protected void postJSON(String url, ObjectMapper mapper, JsonNode node) {
-        try {
-            String jsonString = mapper.writeValueAsString(node);
-            HTTPUtil.post(url, jsonString.getBytes());
-        } catch (Exception e) {
-            System.err.println("BSTMonetize Response Error: " + e.getMessage());
         }
     }
 

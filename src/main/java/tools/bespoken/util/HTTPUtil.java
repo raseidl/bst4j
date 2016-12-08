@@ -20,6 +20,7 @@ public class HTTPUtil {
         connection.setRequestMethod("GET");
         connection.setDoOutput(false);
         connection.setDoInput(true);
+        connection.setConnectTimeout(2000);
         BufferedInputStream bis = new BufferedInputStream(connection.getInputStream());
         ByteBuffer payload = ByteBuffer.allocate(10000);
         byte [] buffer = new byte[2048];
