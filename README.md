@@ -45,7 +45,7 @@ JavaDocs for Logless are [here.](https://static.javadoc.io/tools.bespoken/bst4j/
 To capture logs from a Speechlet running inside a Lambda, simply call:  
 ```
     public HelloWorldSpeechletRequestStreamHandler() {
-        super(Logless.capture("292fbf19-61fd-4ec6-8a8d-60fea5193904", new HelloWorldSpeechlet()),
+        super(Logless.capture("<SKILL_KEY>", new HelloWorldSpeechlet()),
                 supportedApplicationIds);
     }
 ```
@@ -56,7 +56,7 @@ An example can be found in our bst4jSample project [here](https://github.com/bes
 ### Logless Servlet
 To capture logs from a Speechlet running inside a Java servlet (i.e., as a standalone server), simply call:  
 ```
-    Speechlet wrapper = Logless.capture("292fbf19-61fd-4ec6-8a8d-60fea5193904", 
+    Speechlet wrapper = Logless.capture("<SKILL_KEY>", 
         new HelloWorldSpeechlet());
     context.addServlet(new ServletHolder(createServlet(wrapper)), "/");
 ```
@@ -68,7 +68,7 @@ JavaDocs for BSTMonetize are [here.](https://static.javadoc.io/tools.bespoken/bs
 
 To use it, just call [BSTMonetize.injectSSML](https://static.javadoc.io/tools.bespoken/bst4j/0.1.18/tools/bespoken/client/BSTMonetize.html#injectSSML-java.lang.String-java.lang.String-):
 ```
-    BSTMonetize monetize = new BSTMonetize("MySkillID");
+    BSTMonetize monetize = new BSTMonetize("<SKILL_KEY>");
      SpeechletResponse.newSpeechletResponse(monetize.injectSSML(
           "<speak>Hi! Now a word from our sponsor {ad}! What do you want to do now?</speak>",
           "<speak>Hi!What do you want to do now?</speak>")
