@@ -28,14 +28,14 @@ To include in a Maven project, add the following to your pom.xml:
 <dependency>
     <groupId>tools.bespoken</groupId>
     <artifactId>bst4j</artifactId>
-    <version>0.1.21</version>
+    <version>RELEASE</version>
 </dependency>
 ```
 More details to come.
 
 ### Gradle
 ```
-compile 'tools.bespoken:bst4j:0.1.21'
+compile 'tools.bespoken:bst4j:+'
 ```
 
 ## Logless
