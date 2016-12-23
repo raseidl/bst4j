@@ -69,7 +69,7 @@ JavaDocs for BSTMonetize are [here.](https://static.javadoc.io/tools.bespoken/bs
 To use it, just call [BSTMonetize.injectSSML](https://static.javadoc.io/tools.bespoken/bst4j/0.1.18/tools/bespoken/client/BSTMonetize.html#injectSSML-java.lang.String-java.lang.String-):
 ```
     BSTMonetize monetize = new BSTMonetize("<SKILL_KEY>");
-     SpeechletResponse.newSpeechletResponse(monetize.injectSSML(
+     SpeechletResponse.newSpeechletResponse(monetize.injectSSML(session.getUser().getUserId(),
           "<speak>Hi! Now a word from our sponsor {ad}! What do you want to do now?</speak>",
           "<speak>Hi!What do you want to do now?</speak>")
      ).asSsmlOutputSpeech(), repromptSpeech, card);

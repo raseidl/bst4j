@@ -25,7 +25,7 @@ import java.util.WeakHashMap;
  * Example:<br>
  * <pre>
  *     BSTMonetize monetize = new BSTMonetize("MySkillID");
- *     SpeechletResponse.newSpeechletResponse(monetize.injectSSML(
+ *     SpeechletResponse.newSpeechletResponse(monetize.injectSSML(session.getUser().getUserId(),
  *          "&lt;speak&gt;Hi! Now a word from our sponsor {ad}! What do you want to do now?&lt;/speak&gt;",
  *          "&lt;speak&gt;Hi!What do you want to do now?&lt;/speak&gt;")
  *     ).asSsmlOutputSpeech(), repromptSpeech, card);
