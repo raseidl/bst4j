@@ -31,3 +31,6 @@ The documentation will show up here:
 https://www.javadoc.io/doc/tools.bespoken/bst4j/
 
 This should appear within 24-hours according to the website.
+
+## Travis and Code Coverage
+Code coverage is from codecov.
