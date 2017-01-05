@@ -5,35 +5,33 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 /**
- * Created by jpk on 11/10/16.
+ * This is a singleton, which holds references to the various contexts
+ * It makes sure any log statement is sent to the correct context
  */
 public class PrintStreamWrapper extends PrintStream {
-    private static ThreadLocal<Boolean> printedTracker = new ThreadLocal() {
-        @Override
-        protected Boolean initialValue() {
-            return new Boolean(false);
-        }
-    };
+    // Associate the context with a thread
+    private static ThreadLocal<LoglessContext> contextTracker = new ThreadLocal();
+    public static void addContext(LoglessContext context) {
+        contextTracker.set(context);
+    }
+
     public PrintStream wrappedStream;
-    public LoglessContext context;
     public LoglessContext.LogType logType;
 
-    public PrintStreamWrapper(LoglessContext context, PrintStream stream, LoglessContext.LogType logType) {
+    public PrintStreamWrapper(PrintStream stream, LoglessContext.LogType logType) {
         super(new NullOutputStream());
         this.wrappedStream = stream;
-        this.context = context;
         this.logType = logType;
     }
 
     public void println(String s) {
         wrappedStream.println(s);
-        context.log(logType, s, null, null);
-
+        contextTracker.get().log(logType, s, null, null);
     }
 
     public void print(String s) {
         wrappedStream.print(s);
-        context.log(logType, s, null, null);
+        contextTracker.get().log(logType, s, null, null);
     }
 
     public static class NullOutputStream extends OutputStream {

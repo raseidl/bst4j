@@ -20,6 +20,7 @@ public class BSTMonetizeTest {
     @Test
     public void testRequestCallWithGoodToken() {
         BSTMonetize monetize = new BSTMonetize("MySkill");
+        monetize.
         BSTMonetize.Payload result = monetize.injectSSML("This is ssml {ad} result", "This is my ssml");
         Assert.assertEquals("This is ssml <audio src=\"https://s3.amazonaws.com/bespoken/encoded/ContentPromoPrompt-encoded.mp3\" /><audio src=\"https://monetization.bespoken.tools/v1/adTracker?adRequestID=f81d4fae-7dec-11d0-a765-00a0c91e6bf6\" /> result", result.asSsmlString());
     }
