@@ -3,10 +3,13 @@ To prepare all releases:
 mvn release:clean release:prepare
 
 For Snapshot Releases:
-mvn clean deploy
+mvn -Drelease=true clean deploy
 
 For General Releases:
-mvn release:perform
+mvn -Drelease=true release:perform
+
+The property "-Drelease=true" is so that the CI does not need GPG keys for its builds.
+Instead, they are in their own profile.
 
 Snapshot releases are essentially done automatically when the version in the POM ends in -SNAPSHOT.
 
