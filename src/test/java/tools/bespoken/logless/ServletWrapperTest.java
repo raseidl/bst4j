@@ -51,7 +51,6 @@ public class ServletWrapperTest {
                 Assert.assertEquals("RuntimeException: What happened?", json.get("logs").get(1).get("payload").asText());
 
                 String stack = json.get("logs").get(1).get("stack").asText();
-                System.out.println(stack.split("\n")[0]);
                 Assert.assertTrue(stack.split("\n")[0].startsWith("tools.bespoken.logless.ServletWrapperTest$3.doPost(ServletWrapperTest.java"));
             }
         });

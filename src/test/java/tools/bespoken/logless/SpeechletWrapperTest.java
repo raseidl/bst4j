@@ -134,7 +134,7 @@ public class SpeechletWrapperTest {
             wrapper.onIntent(request, session);
             Assert.fail("This should always throw an exception");
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            
         } catch (Exception e) {
             Assert.fail("This should always throw a runtime exception");
         }
