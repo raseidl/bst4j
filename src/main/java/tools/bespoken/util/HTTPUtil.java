@@ -35,32 +35,6 @@ public class HTTPUtil {
         return new Response(connection.getResponseCode(), payload.array());
     }
 
-    public static Response post (String urlString, byte [] postData) throws Exception {
-        long startTime = System.currentTimeMillis();
-        URL url = new URI(urlString).toURL();
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-        connection.setDoInput(true);
-
-        BufferedOutputStream bos = new BufferedOutputStream(connection.getOutputStream());
-        bos.write(postData, 0, postData.length);
-
-        BufferedInputStream bis = new BufferedInputStream(connection.getInputStream());
-        ByteBuffer payload = ByteBuffer.allocate(10000);
-        byte [] buffer = new byte[2048];
-        int bytesRead = bis.read(buffer);
-        while (bytesRead > -1) {
-            payload.put(buffer, 0, bytesRead);
-            bytesRead = bis.read(buffer);
-        }
-
-        System.out.append("Time: " + (System.currentTimeMillis() - startTime) + "\n");
-        payload.flip();
-        return new Response(connection.getResponseCode(), payload.array());
-    }
-
     public static class Response {
         public int statusCode;
         public byte [] data;

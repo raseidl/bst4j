@@ -87,7 +87,7 @@ public class ServletWrapperTest {
         Servlet mockServlet = new MockServlet("RESPONSE") {
             @Override
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-                response.getOutputStream().print(this.response);;
+                response.getWriter().write(this.response);
             }
         };
         ServletWrapper wrapper = new ServletWrapper(logless, mockServlet);
@@ -95,6 +95,23 @@ public class ServletWrapperTest {
         MockHTTP.MockResponse response = new MockHTTP.MockResponse();
         wrapper.service(new MockHTTP.MockRequest("POST", "REQUEST"), response);
         Assert.assertEquals("RESPONSE", response.dataString());
+    }
+
+    @Test
+    public void testReadInputStream () throws Exception {
+        Servlet mockServlet = new MockServlet("RESPONSE") {
+            @Override
+            protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+                byte [] data = new byte[1024];
+                int length = request.getInputStream().readLine(data, 0, 1024);
+                Assert.assertEquals("REQUEST", new String(data, 0, length));
+                response.getWriter().write(this.response);
+            }
+        };
+
+        ServletWrapper wrapper = (ServletWrapper) Logless.capture("TEST", mockServlet);
+        MockHTTP.MockResponse response = new MockHTTP.MockResponse();
+        wrapper.service(new MockHTTP.MockRequest("POST", "REQUEST"), response);
     }
 
     public static class MockServlet extends HttpServlet {

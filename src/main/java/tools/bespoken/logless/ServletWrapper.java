@@ -38,7 +38,7 @@ public class ServletWrapper extends HttpServlet {
             CapturableStreamResponse responseWrapper = new CapturableStreamResponse((HttpServletResponse) servletResponse);
             try {
                 // Call the servlet, do normal processing
-                this.servlet.service(servletRequest, responseWrapper);
+                this.servlet.service(wrappedRequest, responseWrapper);
                 responseWrapper.flush();
 
                 // Log the response
@@ -66,44 +66,41 @@ public class ServletWrapper extends HttpServlet {
     //Resettable Request from here:
     // https://gist.github.com/calo81/2071634
     private static class ResettableStreamRequest extends HttpServletRequestWrapper {
-        private byte[] rawData;
         private HttpServletRequest request;
         private ResettableServletInputStream servletStream;
 
-        public ResettableStreamRequest(HttpServletRequest request) {
+        public ResettableStreamRequest(HttpServletRequest request) throws IOException {
             super(request);
             this.request = request;
-            this.servletStream = new ResettableServletInputStream();
+
+            byte [] rawData = IOUtils.toByteArray(this.request.getReader());
+            this.servletStream = new ResettableServletInputStream(rawData);
         }
 
 
         public void resetInputStream() {
-            servletStream.stream = new ByteArrayInputStream(rawData);
+            servletStream.reset();
         }
 
         @Override
         public ServletInputStream getInputStream() throws IOException {
-            if (rawData == null) {
-                rawData = IOUtils.toByteArray(this.request.getReader());
-                servletStream.stream = new ByteArrayInputStream(rawData);
-            }
             return servletStream;
         }
 
         @Override
         public BufferedReader getReader() throws IOException {
-            if (rawData == null) {
-                rawData = IOUtils.toByteArray(this.request.getReader());
-                servletStream.stream = new ByteArrayInputStream(rawData);
-            }
             return new BufferedReader(new InputStreamReader(servletStream));
         }
 
     }
 
     private static class ResettableServletInputStream extends ServletInputStream {
-        private ReadListener readListener;
         private ByteArrayInputStream stream;
+        private byte [] data;
+        public ResettableServletInputStream(byte [] data) {
+            this.data = data;
+            this.stream = new ByteArrayInputStream(data);
+        }
 
         @Override
         public void setReadListener(ReadListener readListener) {
@@ -123,6 +120,10 @@ public class ServletWrapper extends HttpServlet {
         @Override
         public int read() throws IOException {
             return stream.read();
+        }
+
+        public void reset () {
+            this.stream = new ByteArrayInputStream(data);
         }
     }
 
@@ -150,22 +151,6 @@ public class ServletWrapper extends HttpServlet {
         public void write(int b) throws IOException {
             originalStream.write(b);
             copyBuffer.put((byte) b);
-        }
-
-        public void write(byte[] b) throws IOException {
-            originalStream.write(b);
-            copyBuffer.put(b);
-        }
-
-        public void write(byte[] b, int off, int len) throws IOException {
-            originalStream.write(b, off, len);
-            copyBuffer.put(b, off, len);
-        }
-
-        @Override
-        public void print(String s) throws IOException {
-            originalStream.print(s);
-            copyBuffer.put(s.getBytes());
         }
 
         public byte[] data() {
