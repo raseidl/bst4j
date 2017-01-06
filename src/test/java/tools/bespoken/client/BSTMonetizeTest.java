@@ -23,11 +23,7 @@ public class BSTMonetizeTest {
     public void testRequestCallWithGoodToken() {
         BSTMonetize monetize = new BSTMonetize("MySkill");
         monetize.prime("JPK");
-        try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
-
-        }
+        sleep(1000);
         BSTMonetize.Payload result = monetize.injectSSML("JPK", "This is ssml {ad} result", "This is my ssml");
         Assert.assertEquals("This is ssml <audio src=\"https://s3.amazonaws.com/bespoken/encoded/ContentPromoPrompt-encoded.mp3\" /><audio src=\"https://monetization.bespoken.tools/v1/track?requestID=121312312\" /> result", result.asSsmlString());
     }
@@ -66,4 +62,24 @@ public class BSTMonetizeTest {
         BSTMonetize.Payload result = monetize.injectSSML("JPK", "This is ssml {ad} result", "This is my no ad ssml");
         Assert.assertEquals("This is my no ad ssml", result.asSsmlString());
     }
+
+    @Test
+    public void testRequestAsOutputSpeech() {
+        BSTMonetize.MonetizerFetchService = MonetizerFetchServiceTest;
+        BSTMonetize monetize = new BSTMonetize("MySkill");
+        monetize.prime("JPK");
+        sleep(1000);
+
+        BSTMonetize.Payload result = monetize.injectSSML("JPK", "This is ssml {ad} result", "This is my no ad ssml");
+        Assert.assertTrue(result.asSsmlOutputSpeech().getSsml().startsWith("This is ssml <audio"));
+    }
+
+    private static void sleep(int sleepMillis) {
+        try {
+            Thread.sleep(sleepMillis);
+        } catch (Exception e) {
+
+        }
+    }
 }
+

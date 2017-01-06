@@ -3,7 +3,10 @@ package tools.bespoken.logless;
 import com.amazon.speech.speechlet.*;
 
 import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Logless will automatically capture logs and diagnostics for your Java Lambda or Servlet.
@@ -16,6 +19,15 @@ import javax.servlet.http.HttpServlet;
  * To use it as a standalone servlet,
  * <pre><code>
  *     Servlet wrapper = Logless.capture("292fbf19-61fd-4ec6-8a8d-60fea5193904", new HelloWorldServlet());
+ * </code></pre>
+ *
+ * Alternatively, you can selectively wrap Servlet endpoints for greater flexibility, such as this:
+ * <pre><code>
+ *     Logless.capture("292fbf19-61fd-4ec6-8a8d-60fea5193904", request, response, new IServletHandler() {
+ *         public void call() throws IOException, ServletException {
+ *             // Main body of servlet processing
+ *         }
+ *     });
  * </code></pre>
  *
  * That's all there is to it. Then you can see all your logs through our handy dashboard!
@@ -43,6 +55,9 @@ public class Logless {
     }
 
     /**
+     * Captures all interactions with a Speechlet for the given source.
+     *
+     * Returns a wrapped Speechlet to be used in code.
      *
      * @param source
      * @param speechlet
@@ -53,10 +68,36 @@ public class Logless {
         return new SpeechletWrapper(logless, speechlet);
     }
 
+    /**
+     * Captures all interactions with a Servlet for the given source.
+     *
+     * Returns a wrapped Servlet to be used in code.
+     *
+     * @param source
+     * @param servlet
+     * @return
+     */
     public static Servlet capture(String source, Servlet servlet) {
         Logless logless = new Logless(source);
         return new ServletWrapper(logless, servlet);
     }
+
+    /**
+     * Captures a particular servlet interaction.
+     *
+     * @param source
+     * @param request
+     * @param response
+     * @param runnable
+     * @throws ServletException
+     * @throws IOException
+     */
+    public static void capture(String source, HttpServletRequest request, HttpServletResponse response, IServletHandler runnable)
+            throws ServletException, IOException {
+        Logless logless = new Logless(source);
+        ServletWrapper.handleServletCall(logless, request, response, runnable);
+    }
+
 
     public LoglessContext newContext() {
         LoglessContext context = new LoglessContext(this.source);

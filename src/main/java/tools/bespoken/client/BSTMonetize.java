@@ -148,11 +148,6 @@ public class BSTMonetize {
             this.ssml = ssml;
         }
 
-        public Payload(String ssml, Ad ad) {
-            this(ssml);
-            this.ad = ad;
-        }
-
         public Payload(String ssml, String error) {
             this(ssml);
             this.error = error;

@@ -1,6 +1,5 @@
 package tools.bespoken.logless;
 
-import com.amazon.speech.speechlet.SpeechletException;
 import tools.bespoken.util.IOUtils;
 
 import javax.servlet.*;
@@ -25,39 +24,49 @@ public class ServletWrapper extends HttpServlet {
         // If this is not an HTTP Servlet request, just ignore it
         // This should not ever happen
         if (servletRequest instanceof HttpServletRequest) {
-            LoglessContext context = logless.newContext();
-
-            // Log the incoming payload
-            ResettableStreamRequest wrappedRequest = new ResettableStreamRequest((HttpServletRequest) servletRequest);
-            String requestData = new String(IOUtils.toByteArray(wrappedRequest.getReader()));
-            context.log(LoglessContext.LogType.INFO, requestData, null, new String[]{"request"});
-
-            // Reset the request stream
-            wrappedRequest.resetInputStream();
-
-            CapturableStreamResponse responseWrapper = new CapturableStreamResponse((HttpServletResponse) servletResponse);
-            try {
-                // Call the servlet, do normal processing
-                this.servlet.service(wrappedRequest, responseWrapper);
-                responseWrapper.flush();
-
-                // Log the response
-                String responseString = new String(responseWrapper.getBytes());
-                context.log(LoglessContext.LogType.INFO, responseString, null, new String[]{"response"});
-                context.flush();
-
-                // Do any exception handling below
-            } catch (ServletException e) {
-                throw handleException(context, e);
-            } catch (IOException e) {
-                throw handleException(context, e);
-            } catch (RuntimeException e) {
-                throw handleException(context, e);
-            }
+            handleServletCall(this.logless, (HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse, new IServletHandler() {
+                @Override
+                public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+                    ServletWrapper.this.servlet.service(request, response);
+                }
+            });
         }
     }
 
-    private <T extends Exception> T handleException (LoglessContext context, T e) {
+    static void handleServletCall(Logless logless, HttpServletRequest request, HttpServletResponse response, IServletHandler handler) throws ServletException, IOException {
+        LoglessContext context = logless.newContext();
+
+        // Log the incoming payload
+        ResettableStreamRequest requestWrapper = new ResettableStreamRequest(request);
+        String requestData = new String(IOUtils.toByteArray(requestWrapper.getReader()));
+        context.log(LoglessContext.LogType.INFO, requestData, null, new String[]{"request"});
+
+        // Reset the request stream
+        requestWrapper.resetInputStream();
+
+        CapturableStreamResponse responseWrapper = new CapturableStreamResponse(response);
+        try {
+            // Call the servlet, do normal processing
+            handler.handle(requestWrapper, responseWrapper);
+            responseWrapper.flush();
+
+            // Log the response
+            String responseString = new String(responseWrapper.getBytes());
+            context.log(LoglessContext.LogType.INFO, responseString, null, new String[]{"response"});
+            context.flush();
+
+            // Do any exception handling below
+        } catch (ServletException e) {
+            throw handleException(context, e);
+        } catch (IOException e) {
+            throw handleException(context, e);
+        } catch (RuntimeException e) {
+            throw handleException(context, e);
+        }
+
+    }
+
+    private static <T extends Exception> T handleException (LoglessContext context, T e) {
         context.logException(LoglessContext.LogType.ERROR, e, null);
         context.flush();
         return e;

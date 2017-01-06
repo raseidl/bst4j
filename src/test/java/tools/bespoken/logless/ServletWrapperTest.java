@@ -113,6 +113,33 @@ public class ServletWrapperTest {
         wrapper.service(new MockHTTP.MockRequest("POST", "REQUEST"), response);
     }
 
+    @Test
+    public void testHandler () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals(3, json.get("logs").size());
+                Assert.assertEquals("INFO", json.get("logs").get(0).get("log_type").textValue());
+                Assert.assertEquals("request", json.get("logs").get(0).get("tags").get(0).textValue());
+                Assert.assertEquals("REQUEST", json.get("logs").get(0).get("payload").asText());
+                Assert.assertEquals("DEBUG", json.get("logs").get(1).get("log_type").textValue());
+                Assert.assertEquals("HANDLER CALL OUT TEST", json.get("logs").get(1).get("payload").textValue());
+                Assert.assertEquals("response", json.get("logs").get(2).get("tags").get(0).textValue());
+                Assert.assertEquals("HANDLER RESPONSE", json.get("logs").get(2).get("payload").asText());
+            }
+        });
+
+        MockHTTP.MockResponse response = new MockHTTP.MockResponse();
+        ServletWrapper.handleServletCall(logless, new MockHTTP.MockRequest("POST", "REQUEST"), response, new IServletHandler() {
+            @Override
+            public void handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+                System.out.println("HANDLER CALL OUT TEST");
+                response.getWriter().write("HANDLER RESPONSE");
+            }
+        });
+        Assert.assertEquals("HANDLER RESPONSE", response.dataString());
+    }
+
     public static class MockServlet extends HttpServlet {
         protected String response;
 
