@@ -24,16 +24,23 @@ public class PrintStreamWrapper extends PrintStream {
         this.logType = logType;
     }
 
+    @Override
+    public void write(byte [] bytes, int offset, int length) {
+        wrappedStream.write(bytes, offset, length);
+        contextTracker.get().log(logType, new String(bytes, offset, length), null, null);
+    }
+
+    @Override
     public void println(String s) {
         wrappedStream.println(s);
         contextTracker.get().log(logType, s, null, null);
     }
 
+    @Override
     public void print(String s) {
         wrappedStream.print(s);
         contextTracker.get().log(logType, s, null, null);
     }
-
     public static class NullOutputStream extends OutputStream {
         @Override
         public void write(int b) throws IOException {

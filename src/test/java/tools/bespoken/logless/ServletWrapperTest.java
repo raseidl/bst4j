@@ -233,7 +233,11 @@ public class ServletWrapperTest {
                     public void transmit(String jsonString) {
                         super.transmit(jsonString);
                         JsonNode json = JSONUtil.toJSON(jsonString);
-                        verifier.verify(json);
+                        try {
+                            verifier.verify(json);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 };
             }
