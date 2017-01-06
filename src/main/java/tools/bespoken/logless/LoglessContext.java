@@ -26,8 +26,9 @@ public class LoglessContext {
         this.source = source;
         this.transactionID = UUID.randomUUID().toString();
         this.resetQueue();
-        System.setOut(new PrintStreamWrapper(this, System.out, LogType.DEBUG));
-        System.setErr(new PrintStreamWrapper(this, System.err, LogType.ERROR));
+
+        //Registers itself with the PrintStreamWrapper, so the System.out and System.err are sent to the right place
+        PrintStreamWrapper.addContext(this);
     }
 
     public void log(LogType logType, Object data, String [] parameters, String [] tags) {

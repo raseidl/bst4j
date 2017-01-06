@@ -59,7 +59,7 @@ public class BSTMonetize {
         try {
             HTTPUtil.get(url);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("BSTMonetize Error fetching ad: " + e.getMessage());
         }
     }
 
@@ -117,7 +117,7 @@ public class BSTMonetize {
                         payload.get("trackingURL").asText());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("BSTMonetize Error fetching ad: " + e.getMessage());
         }
         return ad;
     }
@@ -146,11 +146,6 @@ public class BSTMonetize {
 
         public Payload(String ssml) {
             this.ssml = ssml;
-        }
-
-        public Payload(String ssml, Ad ad) {
-            this(ssml);
-            this.ad = ad;
         }
 
         public Payload(String ssml, String error) {

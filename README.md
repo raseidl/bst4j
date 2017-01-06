@@ -11,6 +11,12 @@
 </p>
 
 <p align="center">
+    <a href="https://travis-ci.org/bespoken/bst4j">
+        <img alt="Build Status" class="badge" src="https://travis-ci.org/bespoken/bst4j.svg?branch=master">
+    </a>
+    <a href="https://codecov.io/gh/bespoken/bst4j">
+        <img src="https://codecov.io/gh/bespoken/bst4j/branch/master/graph/badge.svg" alt="Codecov" />
+    </a>
     <a href="https://www.javadoc.io/doc/tools.bespoken/bst4j">
         <img src="https://www.javadoc.io/badge/tools.bespoken/bst4j.svg" alt="Javadocs">
     </a>

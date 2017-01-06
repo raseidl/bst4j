@@ -14,6 +14,57 @@ import org.junit.Test;
 public class SpeechletWrapperTest {
 
     @Test
+    public void testLaunchRequest () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals(2, json.get("logs").size());
+                Assert.assertNotNull(json.get("logs").get(0).get("payload").get("request"));
+                Assert.assertEquals("LaunchRequest", json.get("logs").get(0).get("payload").get("request").get("type").asText());
+            }
+        });
+
+        SpeechletWrapper wrapper = new SpeechletWrapper(logless, new MockSpeechlet());
+        LaunchRequest launch = LaunchRequest.builder().withRequestId("RequestId").build();
+        Session session = Session.builder().withSessionId("TestSessionID").build();
+        wrapper.onLaunch(launch, session);
+    }
+
+    @Test
+    public void testOnSessionStarted () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals(1, json.get("logs").size());
+                Assert.assertNotNull(json.get("logs").get(0).get("payload").get("request"));
+                Assert.assertEquals("SessionStartedRequest", json.get("logs").get(0).get("payload").get("request").get("type").asText());
+            }
+        });
+
+        SpeechletWrapper wrapper = new SpeechletWrapper(logless, new MockSpeechlet());
+        SessionStartedRequest request = SessionStartedRequest.builder().withRequestId("RequestId").build();
+        Session session = Session.builder().withSessionId("TestSessionID").build();
+        wrapper.onSessionStarted(request, session);
+    }
+
+    @Test
+    public void testOnSessionEnded () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals(1, json.get("logs").size());
+                Assert.assertNotNull(json.get("logs").get(0).get("payload").get("request"));
+                Assert.assertEquals("SessionEndedRequest", json.get("logs").get(0).get("payload").get("request").get("type").asText());
+            }
+        });
+
+        SpeechletWrapper wrapper = new SpeechletWrapper(logless, new MockSpeechlet());
+        SessionEndedRequest request = SessionEndedRequest.builder().withRequestId("RequestId").build();
+        Session session = Session.builder().withSessionId("TestSessionID").build();
+        wrapper.onSessionEnded(request, session);
+    }
+
+    @Test
     public void testIntentRequest () throws Exception {
         Logless logless = newLogless(new IVerifier() {
             @Override
@@ -83,7 +134,7 @@ public class SpeechletWrapperTest {
             wrapper.onIntent(request, session);
             Assert.fail("This should always throw an exception");
         } catch (RuntimeException e) {
-            e.printStackTrace();
+
         } catch (Exception e) {
             Assert.fail("This should always throw a runtime exception");
         }
