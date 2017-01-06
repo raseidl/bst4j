@@ -1,6 +1,8 @@
 package tools.bespoken.logless;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import tools.bespoken.util.IOUtils;
+import tools.bespoken.util.JSONUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -39,7 +41,10 @@ public class ServletWrapper extends HttpServlet {
         // Log the incoming payload
         ResettableStreamRequest requestWrapper = new ResettableStreamRequest(request);
         String requestData = new String(IOUtils.toByteArray(requestWrapper.getReader()));
-        context.log(LoglessContext.LogType.INFO, requestData, null, new String[]{"request"});
+
+        // Convert to JSON, if appropriate based on the content-type
+        Object requestPayload = formatPayload(request.getHeader("Content-Type"), requestData);
+        context.log(LoglessContext.LogType.INFO, requestPayload, null, new String[]{"request"});
 
         // Reset the request stream
         requestWrapper.resetInputStream();
@@ -52,7 +57,8 @@ public class ServletWrapper extends HttpServlet {
 
             // Log the response
             String responseString = new String(responseWrapper.getBytes());
-            context.log(LoglessContext.LogType.INFO, responseString, null, new String[]{"response"});
+            Object responsePayload = formatPayload(response.getHeader("Content-Type"), responseString);
+            context.log(LoglessContext.LogType.INFO, responsePayload, null, new String[]{"response"});
             context.flush();
 
             // Do any exception handling below
@@ -63,7 +69,18 @@ public class ServletWrapper extends HttpServlet {
         } catch (RuntimeException e) {
             throw handleException(context, e);
         }
+    }
 
+    private static Object formatPayload(String contentType, String payloadString) {
+        Object payload = payloadString;
+        if (contentType != null && contentType.equals("application/json")) {
+            try {
+                payload = JSONUtil.toJSON(payloadString);
+            } catch (Exception e) {
+                // Ignore any exception on JSON parsing - just return the raw string instead
+            }
+        }
+        return payload;
     }
 
     private static <T extends Exception> T handleException (LoglessContext context, T e) {

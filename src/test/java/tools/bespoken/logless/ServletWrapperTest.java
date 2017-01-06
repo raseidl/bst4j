@@ -42,6 +42,51 @@ public class ServletWrapperTest {
     }
 
     @Test
+    public void testRequestWithJSON () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals(4, json.get("logs").size());
+                Assert.assertEquals("INFO", json.get("logs").get(0).get("log_type").textValue());
+                Assert.assertEquals("request", json.get("logs").get(0).get("tags").get(0).textValue());
+                Assert.assertEquals(true, json.get("logs").get(0).get("payload").get("request").asBoolean());
+                Assert.assertEquals("b", json.get("logs").get(0).get("payload").get("object").get("a").asText());
+                Assert.assertEquals("response", json.get("logs").get(3).get("tags").get(0).textValue());
+                Assert.assertEquals(true, json.get("logs").get(3).get("payload").get("response").asBoolean());
+            }
+        });
+
+        Servlet mockServlet = new MockServlet("{ \"response\": true }");
+        ServletWrapper wrapper = new ServletWrapper(logless, mockServlet);
+
+        MockHTTP.MockResponse response = new MockHTTP.MockResponse().header("Content-Type", "application/json");
+        wrapper.service(new MockHTTP.MockRequest("POST", "{ \"request\": true, \"object\": { \"a\":\"b\" }}").header("Content-Type", "application/json"), response);
+        Assert.assertEquals("{ \"response\": true }", response.dataString());
+    }
+
+    @Test
+    public void testRequestWithBadJSON () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals(4, json.get("logs").size());
+                Assert.assertEquals("INFO", json.get("logs").get(0).get("log_type").textValue());
+                Assert.assertEquals("request", json.get("logs").get(0).get("tags").get(0).textValue());
+                Assert.assertEquals("{ \"request\": true, object\": { \"a\":\"b\" }}", json.get("logs").get(0).get("payload").asText());
+                Assert.assertEquals("response", json.get("logs").get(3).get("tags").get(0).textValue());
+                Assert.assertEquals("RESPONSE", json.get("logs").get(3).get("payload").asText());
+            }
+        });
+
+        Servlet mockServlet = new MockServlet("RESPONSE");
+        ServletWrapper wrapper = new ServletWrapper(logless, mockServlet);
+
+        MockHTTP.MockResponse response = new MockHTTP.MockResponse();
+        wrapper.service(new MockHTTP.MockRequest("POST", "{ \"request\": true, object\": { \"a\":\"b\" }}").header("Content-Type", "application/json"), response);
+        Assert.assertEquals("RESPONSE", response.dataString());
+    }
+
+    @Test
     public void testRequestWithRuntimeException () throws Exception {
         Logless logless = newLogless(new IVerifier() {
             @Override
@@ -51,7 +96,7 @@ public class ServletWrapperTest {
                 Assert.assertEquals("RuntimeException: What happened?", json.get("logs").get(1).get("payload").asText());
 
                 String stack = json.get("logs").get(1).get("stack").asText();
-                Assert.assertTrue(stack.split("\n")[0].startsWith("tools.bespoken.logless.ServletWrapperTest$3.doPost(ServletWrapperTest.java"));
+                Assert.assertTrue(stack.split("\n")[0].startsWith("tools.bespoken.logless.ServletWrapperTest"));
             }
         });
 

@@ -5,10 +5,7 @@ import javax.servlet.http.*;
 import java.io.*;
 import java.nio.*;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jpk on 1/5/17.
@@ -17,10 +14,16 @@ public class MockHTTP {
     public static class MockRequest implements HttpServletRequest {
         private String payload;
         private String method;
+        private Map<String, String> headers = new HashMap<String, String>();
 
         public MockRequest(String method, String payload) {
             this.method = method;
             this.payload = payload;
+        }
+
+        public MockRequest header(String name, String value) {
+            this.headers.put(name, value);
+            return this;
         }
 
         @Override
@@ -31,6 +34,11 @@ public class MockHTTP {
         @Override
         public BufferedReader getReader() throws IOException {
             return new BufferedReader(new StringReader(this.payload));
+        }
+
+        @Override
+        public String getHeader(String s) {
+            return headers.get(s);
         }
 
         @Override
@@ -46,11 +54,6 @@ public class MockHTTP {
         @Override
         public long getDateHeader(String s) {
             return 0;
-        }
-
-        @Override
-        public String getHeader(String s) {
-            return null;
         }
 
         @Override
@@ -371,6 +374,7 @@ public class MockHTTP {
 
     public static class MockResponse implements HttpServletResponse {
         private MockOutputStream stream = new MockOutputStream();
+        private Map<String, String> headers = new HashMap<String, String>();
 
         @Override
         public ServletOutputStream getOutputStream() throws IOException {
@@ -384,6 +388,23 @@ public class MockHTTP {
         public String dataString () {
             return new String(stream.getBytes());
         }
+
+
+        public MockResponse header(String s, String s1) {
+            setHeader(s, s1);
+            return this;
+        }
+
+        @Override
+        public void setHeader(String s, String s1) {
+            headers.put(s, s1);
+        }
+
+        @Override
+        public String getHeader(String s) {
+            return headers.get(s);
+        }
+
 
         @Override
         public void addCookie(Cookie cookie) {
@@ -441,11 +462,6 @@ public class MockHTTP {
         }
 
         @Override
-        public void setHeader(String s, String s1) {
-
-        }
-
-        @Override
         public void addHeader(String s, String s1) {
 
         }
@@ -473,11 +489,6 @@ public class MockHTTP {
         @Override
         public int getStatus() {
             return 0;
-        }
-
-        @Override
-        public String getHeader(String s) {
-            return null;
         }
 
         @Override
