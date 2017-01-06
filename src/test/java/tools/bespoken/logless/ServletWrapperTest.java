@@ -65,6 +65,26 @@ public class ServletWrapperTest {
     }
 
     @Test
+    public void testRequestWithJSONAndEncoding () throws Exception {
+        Logless logless = newLogless(new IVerifier() {
+            @Override
+            public void verify(JsonNode json) {
+                Assert.assertEquals("INFO", json.get("logs").get(0).get("log_type").textValue());
+                Assert.assertEquals("request", json.get("logs").get(0).get("tags").get(0).textValue());
+                Assert.assertEquals(true, json.get("logs").get(0).get("payload").get("request").asBoolean());
+            }
+        });
+
+        Servlet mockServlet = new MockServlet("{ \"response\": true }");
+        ServletWrapper wrapper = new ServletWrapper(logless, mockServlet);
+
+        //application/json; charset=utf-8
+        MockHTTP.MockResponse response = new MockHTTP.MockResponse().header("Content-Type", "application/json; charset=utf-8");
+        wrapper.service(new MockHTTP.MockRequest("POST", "{ \"request\": true }").header("Content-Type", "application/json"), response);
+        Assert.assertEquals("{ \"response\": true }", response.dataString());
+    }
+
+    @Test
     public void testRequestWithBadJSON () throws Exception {
         Logless logless = newLogless(new IVerifier() {
             @Override

@@ -73,7 +73,7 @@ public class ServletWrapper extends HttpServlet {
 
     private static Object formatPayload(String contentType, String payloadString) {
         Object payload = payloadString;
-        if (contentType != null && contentType.equals("application/json")) {
+        if (contentType != null && contentType.startsWith("application/json")) {
             try {
                 payload = JSONUtil.toJSON(payloadString);
             } catch (Exception e) {
