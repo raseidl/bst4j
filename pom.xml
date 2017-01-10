@@ -4,7 +4,7 @@
 
     <groupId>tools.bespoken</groupId>
     <artifactId>bst4j</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>bst4j</name>
     <description>Bespoken Tools for Java</description>
@@ -27,7 +27,7 @@
         <url>https://github.com/bespoken/bst4j</url>
         <connection>scm:git:https://github.com/bespoken/bst4j.git</connection>
         <developerConnection>scm:git:https://github.com/bespoken/bst4j.git</developerConnection>
-        <tag>bst4j-0.2.2</tag>
+        <tag>v0.1.9</tag>
     </scm>
 
     <distributionManagement>
