@@ -205,6 +205,13 @@ public class ServletWrapperTest {
         Assert.assertEquals("HANDLER RESPONSE", response.dataString());
     }
 
+    @Test
+    public void testHandlerWithNoContext () throws Exception {
+        // Makes sure that when a context is not set for a thread, it does not blow up
+        Logless logless = new Logless("TEST");
+        System.out.println("OUTPUT OUTSIDE OF CALLBACK");
+    }
+
     public static class MockServlet extends HttpServlet {
         protected String response;
 
