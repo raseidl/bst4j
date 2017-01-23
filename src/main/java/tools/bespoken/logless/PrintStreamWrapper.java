@@ -27,19 +27,27 @@ public class PrintStreamWrapper extends PrintStream {
     @Override
     public void write(byte [] bytes, int offset, int length) {
         wrappedStream.write(bytes, offset, length);
-        contextTracker.get().log(logType, new String(bytes, offset, length), null, null);
+        if (contextTracker.get() != null) {
+            contextTracker.get().log(logType, new String(bytes, offset, length), null, null);
+        }
     }
 
     @Override
     public void println(String s) {
         wrappedStream.println(s);
-        contextTracker.get().log(logType, s, null, null);
+        log(logType, s);
     }
 
     @Override
     public void print(String s) {
         wrappedStream.print(s);
-        contextTracker.get().log(logType, s, null, null);
+        log(logType, s);
+    }
+
+    private void log(LoglessContext.LogType logType, String log) {
+        if (contextTracker.get() != null) {
+            contextTracker.get().log(logType, log, null, null);
+        }
     }
     public static class NullOutputStream extends OutputStream {
         @Override

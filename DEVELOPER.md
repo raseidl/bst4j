@@ -6,7 +6,7 @@ For Snapshot Releases:
 mvn -Drelease=true clean deploy
 
 For General Releases:
-mvn -Drelease=true release:perform
+Use the same command as above, but first remove the SNAPSHOT from pom.xml
 
 The property "-Drelease=true" is so that the CI does not need GPG keys for its builds.
 Instead, they are in their own profile.
