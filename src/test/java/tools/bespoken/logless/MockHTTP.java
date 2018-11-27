@@ -14,7 +14,7 @@ public class MockHTTP {
     public static class MockRequest implements HttpServletRequest {
         private String payload;
         private String method;
-        private Map<String, String> headers = new HashMap<String, String>();
+        private Map<String, String> headers = new HashMap<>();
 
         public MockRequest(String method, String payload) {
             this.method = method;
@@ -374,7 +374,7 @@ public class MockHTTP {
 
     public static class MockResponse implements HttpServletResponse {
         private MockOutputStream stream = new MockOutputStream();
-        private Map<String, String> headers = new HashMap<String, String>();
+        private Map<String, String> headers = new HashMap<>();
 
         @Override
         public ServletOutputStream getOutputStream() throws IOException {

@@ -10,7 +10,7 @@ import java.io.PrintStream;
  */
 public class PrintStreamWrapper extends PrintStream {
     // Associate the context with a thread
-    private static ThreadLocal<LoglessContext> contextTracker = new ThreadLocal();
+    private static ThreadLocal<LoglessContext> contextTracker = new ThreadLocal<>();
     public static void addContext(LoglessContext context) {
         contextTracker.set(context);
     }
