@@ -1,13 +1,12 @@
 <p align="center">
-  <a href="https://bespoken.tools/">
-    <img alt="bst4j" src="https://bespoken.tools/assets/bst-cli-9f9b8d685e450d33985b23d86505ffd7217635305f126625bc992b0865ff7a4d.png" width="546">
+  <a href="https://bespoken.io/">
+    <img alt="BST" src="https://bespoken.io/wp-content/uploads/Bespoken-Logo-RGB-e1500333659572.png" width="546">
   </a>
 </p>
 
 <p align="center">
   Switch to BEAST mode<br>
-  Rampage through code/test iterations for Alexa and Lambda development<br>
-  For Java!
+  Rampage through code/test iterations for Alexa and Lambda development
 </p>
 
 <p align="center">
