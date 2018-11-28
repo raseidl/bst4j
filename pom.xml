@@ -4,7 +4,7 @@
 
     <groupId>tools.bespoken</groupId>
     <artifactId>bst4j</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>0.2.5</version>
     <packaging>jar</packaging>
     <name>bst4j</name>
     <description>Bespoken Tools for Java</description>
