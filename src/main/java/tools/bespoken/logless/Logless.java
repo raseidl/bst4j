@@ -60,7 +60,9 @@ public class Logless {
      * Returns a wrapped Speechlet to be used in code.
      *
      * @param source
+     *     The bespoken app token
      * @param speechlet
+     *     The speechlet which should be wrapped
      * @return
      */
     public static Speechlet capture(String source, Speechlet speechlet) {
@@ -69,12 +71,30 @@ public class Logless {
     }
 
     /**
+     * Captures all interactions with a SpeechletV2 for the given source.
+     *
+     * Returns a wrapped SpeechletV2 to be used in code.
+     *
+     * @param source
+     *     The bespoken app token
+     * @param speechlet
+     *     The speechlet which should be wrapped
+     * @return
+     */
+    public static SpeechletV2 capture(String source, SpeechletV2 speechlet) {
+        Logless logless = new Logless(source);
+        return new SpeechletV2Wrapper(logless, speechlet);
+    }
+
+    /**
      * Captures all interactions with a Servlet for the given source.
      *
      * Returns a wrapped Servlet to be used in code.
      *
      * @param source
+     *     The bespoken app token
      * @param servlet
+     *     The servlet which should be wrapped
      * @return
      */
     public static Servlet capture(String source, Servlet servlet) {
